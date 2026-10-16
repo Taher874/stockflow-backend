@@ -21,6 +21,49 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+## StockFlow backend
+
+REST API for the StockFlow inventory app, built with NestJS, MongoDB, and JWT.
+
+### Setup
+
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` to `.env` and set a unique `JWT_SECRET`, MongoDB URI, and administrator email/password. The bootstrap password must contain at least 12 characters. The administrator account is created on startup if that email is not already registered.
+3. Start MongoDB, then run `npm run start:dev`.
+4. Open `http://localhost:3000/api/docs` for the Swagger API.
+
+In development, if `JWT_SECRET` is omitted the server generates a temporary random key on startup, so tokens stop working after a restart. Production requires an explicitly configured secret.
+
+### API overview
+
+All routes except `POST /auth/register` and `POST /auth/login` require `Authorization: Bearer <accessToken>`.
+
+| Method | Route | Access | Purpose |
+| --- | --- | --- | --- |
+| POST | `/auth/register` | Public | Create a regular user account |
+| POST | `/auth/login` | Public | Sign in and receive a one-hour JWT |
+| GET | `/auth/me` | Signed in | Get the current account |
+| GET | `/products?search=...` | Signed in | List products, optionally search name/category |
+| GET | `/dashboard` | Signed in | Get total stock, product count, and low-stock products |
+| POST | `/products` | Admin | Create a product |
+| PUT | `/products/:id` | Admin | Update a product |
+| DELETE | `/products/:id` | Admin | Delete a product |
+
+Product JSON uses the app's field names: `name`, `category`, `price`, `quantity`, and `minStock`. Registration always creates a regular user; public requests cannot grant themselves administrator access.
+
+### Example requests
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@example.com","password":"your-bootstrap-password"}'
+
+curl http://localhost:3000/products \
+  -H 'Authorization: Bearer <accessToken>'
+```
+
+The Flutter client should replace its local sample `products` list and hard-coded login checks with calls to these endpoints, then store the returned token and include it in subsequent requests.
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
